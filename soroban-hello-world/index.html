@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssetChain - P2P Asset Leasing Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/10.4.1/stellar-sdk.min.js"></script>
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #172755 0%, #1A365D 100%);
+        }
+        .section-gradient {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+        }
+        .card-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .badge-active {
+            background-color: #10B981;
+        }
+        .badge-pending {
+            background-color: #F59E0B;
+        }
+        .badge-completed {
+            background-color: #6366F1;
+        }
+        .badge-disputed {
+            background-color: #EF4444;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-800">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-indigo-600">AssetChain</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Home
+                        </a>
+                        <a href="#explore" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Explore Assets
+                        </a>
+                        <a href="#register" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Register Asset
+                        </a>
+                        <a href="#dashboard" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            My Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="wallet-container">
+                        <button id="connect-wallet" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                            Connect Wallet
+                        </button>
+                        <div id="wallet-info" class="hidden">
+                            <span id="wallet-address" class="text-sm text-gray-700 mr-2"></span>
+                            <span id="wallet-balance" class="text-sm font-medium text-indigo-600"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white pt-24 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:flex lg:items-center lg:justify-between">
+                <div class="lg:w-1/2 mb-8 lg:mb-0">
+                    <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+                        Lease & Rent Assets on the Stellar Blockchain
+                    </h1>
+                    <p class="mt-4 text-xl text-gray-300">
+                        A secure, transparent P2P platform for leasing physical assets with smart contracts
+                    </p>
+                    <div class="mt-8 flex flex-col sm:flex-row sm:space-x-4">
+                        <a href="#explore" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md bg-white text-indigo-600 hover:bg-gray-50 mb-3 sm:mb-0">
+                            Browse Assets
+                        </a>
+                        <a href="#register" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600">
+                            Register Your Asset
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <img src="shubham-dhage-T9rKvI3N0NM-unsplash.jpg" alt="Asset leasing illustration" class="rounded-lg shadow-xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <div class="border rounded-lg p-6 text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="total-assets">0</div>
+                    <div class="text-sm text-gray-500">Total Assets</div>
+                </div>
+                <div class="border rounded-lg p-6 text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="active-leases">0</div>
+                    <div class="text-sm text-gray-500">Active Leases</div>
+                </div>
+                <div class="border rounded-lg p-6 text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="completed-leases">0</div>
+                    <div class="text-sm text-gray-500">Completed Leases</div>
+                </div>
+                <div class="border rounded-lg p-6 text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="total-value">0 XLM</div>
+                    <div class="text-sm text-gray-500">Total Value Locked</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Asset Detail Modal -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity hidden" id="asset-detail-modal">
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-xl font-bold leading-6 text-gray-900" id="modal-asset-title">Professional Camera Kit</h3>
+                                    <button class="text-gray-500 hover:text-gray-700" id="close-modal">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="aspect-w-16 aspect-h-9 mb-4">
+                                        <img src="/api/placeholder/800/450" alt="Asset" class="rounded-lg object-cover w-full" id="modal-asset-image">
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        <div class="bg-gray-50 p-3 rounded">
+                                            <!-- Modal content goes here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Connection Notification -->
+    <div id="wallet-notification" class="fixed top-4 right-4 bg-white p-4 rounded-lg shadow-lg z-50 hidden">
+        <div class="flex items-center">
+            <div class="bg-green-100 rounded-full p-2 mr-3">
+                <i class="fas fa-check-circle text-green-600"></i>
+            </div>
+            <div>
+                <h4 class="font-medium text-gray-800">Wallet Connected</h4>
+                <p class="text-sm text-gray-600">Your Stellar wallet has been connected successfully.</p>
+                <p class="text-sm font-medium text-indigo-600 mt-1" id="notification-address"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let stellarServer;
+        let connectedWalletAddress = '';
+        let walletBalance = 0;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up Stellar connection
+            stellarServer = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+            
+            // Set up event listeners
+            document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+            
+            // Initialize stats
+            updateStats();
+        });
+        
+        // Connect wallet function
+        function connectWallet() {
+            // In a real implementation, you would use a wallet provider or connection dialog
+            // For this demo, we'll hard-code the wallet address you provided
+            const walletAddress = 'GA43EXF75T7NWG6SCOV5HIBZUP6X2QU5BXZ2XYBM7KHMUKM5SVWN4YG5';
+            
+            // Update UI with the connected wallet
+            connectedWalletAddress = walletAddress;
+            
+            // Format address for display (first 6...last 4 characters)
+            const shortAddress = walletAddress.substring(0, 6) + '...' + walletAddress.substring(walletAddress.length - 4);
+            
+            // Update wallet display
+            document.getElementById('wallet-address').textContent = shortAddress;
+            document.getElementById('connect-wallet').classList.add('hidden');
+            document.getElementById('wallet-info').classList.remove('hidden');
+            
+            // Show the dashboard
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            // Show notification
+            document.getElementById('notification-address').textContent = shortAddress;
+            const notification = document.getElementById('wallet-notification');
+            notification.classList.remove('hidden');
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 5000);
+            
+            // Get account information from Stellar network
+            getAccountInfo(walletAddress);
+        }
+        
+        // Get account information from Stellar
+        async function getAccountInfo(walletAddress) {
+            try {
+                const account = await stellarServer.loadAccount(walletAddress);
+                // Find XLM balance
+                const xlmBalance = account.balances.find(balance => balance.asset_type === 'native');
+                if (xlmBalance) {
+                    walletBalance = parseFloat(xlmBalance.balance).toFixed(2);
+                    document.getElementById('wallet-balance').textContent = `${walletBalance} XLM`;
+                }
+                
+                console.log('Account loaded successfully', account);
+            } catch (error) {
+                console.error('Error loading account:', error);
+                // If we can't connect to the Stellar network, show mock data
+                document.getElementById('wallet-balance').textContent = '1,000.00 XLM';
+            }
+        }
+        
+        // Update stats with mock data
+        function updateStats() {
+            document.getElementById('total-assets').textContent = '32';
+            document.getElementById('active-leases').textContent = '18';
+            document.getElementById('completed-leases').textContent = '45';
+            document.getElementById('total-value').textContent = '24,500 XLM';
+        }
+        
+        // Tab switching functionality for dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabLinks = document.querySelectorAll('.tab-link');
+            
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all tabs
+                    tabLinks.forEach(tab => {
+                        tab.classList.remove('border-indigo-500', 'text-indigo-600');
+                        tab.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    
+                    // Add active class to current tab
+                    this.classList.remove('border-transparent', 'text-gray-500');
+                    this.classList.add('border-indigo-500', 'text-indigo-600');
+                    
+                    // Hide all tab content
+                    const tabContents = document.querySelectorAll('.tab-content');
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show current tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-content`).classList.remove('hidden');
+                });
+            });
+        });
+        
+        // Modal functions
+        function openModal() {
+            document.getElementById('asset-detail-modal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('asset-detail-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
